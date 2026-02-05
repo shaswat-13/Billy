@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Expense</title>
+</head>
+<body>
+    <h1>Add Expense</h1>
+    
+    <a href="{% url 'core:dashboard' %}">Back to Dashboard</a>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <p>{{ form.non_field_errors }}</p>
+        {% endif %}
+        
+        <div>
+            <label for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+            {{ form.amount }}
+            {% if form.amount.errors %}
+                <p>{{ form.amount.errors }}</p>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <p>{{ form.description.errors }}</p>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+            {{ form.date }}
+            {% if form.date.errors %}
+                <p>{{ form.date.errors }}</p>
+            {% endif %}
+        </div>
+        
+        <button type="submit">Add Expense</button>
+    </form>
+</body>
+</html>

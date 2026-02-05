@@ -1,11 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import SignupForm, LoginForm
+from .forms import SignupForm, LoginForm, IncomeForm, ExpenseForm
+from .models import Income, Expense
 
 def index(request):
+    if request.user.is_authenticated:
+        return redirect('core:dashboard')
+    
     return render(request, 'core/index.html')
 
 def signup_view(request):
@@ -95,8 +99,95 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
-    # This code only runs if user is authenticated
-    # request.user is guaranteed to be a real User object (not AnonymousUser)
+    """
+    Dashboard - Protected page that shows user's financial data
+    """
+    # Fetch ONLY the logged-in user's records
+    incomes = Income.objects.filter(user=request.user).order_by('-date')
+    expenses = Expense.objects.filter(user=request.user).order_by('-date')
+    
+    # Calculate totals
+    total_income = sum(income.amount for income in incomes)
+    total_expenses = sum(expense.amount for expense in expenses)
+    balance = total_income - total_expenses
+    
     return render(request, 'core/dashboard.html', {
-    'user': request.user
+        'user': request.user,
+        'incomes': incomes,
+        'expenses': expenses,
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'balance': balance,
     })
+
+#################################################################################################################
+
+@login_required
+def add_income(request):
+    if request.method == 'POST':
+        form = IncomeForm(request.POST)
+        
+        if form.is_valid():
+            # Create income object but DON'T save to database yet
+            income = form.save(commit=False)
+            
+            # Set ownership
+            income.user = request.user
+            
+            # NOW save to database
+            income.save()
+            
+            messages.success(request, f'Income of ${income.amount} added successfully!')
+            return redirect('core:dashboard')
+    
+    else:
+        # GET request - show empty form
+        form = IncomeForm()
+    
+    return render(request, 'core/add_income.html', {'form': form})
+
+
+@login_required
+def add_expense(request):
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST)
+        
+        if form.is_valid():
+            # Create expense object but DON'T save yet
+            expense = form.save(commit=False)
+            
+            # Set ownership
+            expense.user = request.user
+            
+            # Save to database
+            expense.save()
+            
+            messages.success(request, f'Expense of ${expense.amount} added successfully!')
+            return redirect('core:dashboard')
+    
+    else:
+        # GET request - show empty form
+        form = ExpenseForm()
+    
+    return render(request, 'core/add_expense.html', {'form': form})
+
+@login_required
+def delete_income(request, income_id):
+    income = get_object_or_404(Income, id=income_id, user=request.user)
+    
+    # Only runs if ownership verified
+    income.delete()
+    
+    messages.success(request, 'Income deleted successfully!')
+    return redirect('core:dashboard')
+
+
+@login_required
+def delete_expense(request, expense_id):
+    # Ownership check built into this line
+    expense = get_object_or_404(Expense, id=expense_id, user=request.user)
+    
+    expense.delete()
+    
+    messages.success(request, 'Expense deleted successfully!')
+    return redirect('core:dashboard')

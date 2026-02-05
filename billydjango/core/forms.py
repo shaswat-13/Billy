@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
+from datetime import date
+from .models import Income, Expense
 
 
 class SignupForm(forms.Form):
@@ -130,3 +132,88 @@ class LoginForm(forms.Form):
             cleaned_data['user'] = user
         
         return cleaned_data
+
+
+class IncomeForm(forms.ModelForm):
+    class Meta:
+        model = Income
+        fields = ['amount', 'source', 'date']
+        # IMPORTANT: 'user' is NOT in fields - we set it in the view
+        
+        widgets = {
+            'amount': forms.NumberInput(attrs={
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0.01'
+            }),
+            'source': forms.TextInput(attrs={
+                'placeholder': 'e.g., Salary, Freelance, Gift'
+            }),
+            'date': forms.DateInput(attrs={
+                'type': 'date'
+            })
+        }
+        
+        labels = {
+            'amount': 'Amount ($)',
+            'source': 'Income Source',
+            'date': 'Date'
+        }
+    
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        
+        if amount is not None and amount <= 0:
+            raise ValidationError("Amount must be greater than zero.")
+        
+        return amount
+    
+    def clean_date(self):
+        income_date = self.cleaned_data.get('date')
+        
+        if income_date and income_date > date.today():
+            raise ValidationError("Income date cannot be in the future.")
+        
+        return income_date
+
+
+class ExpenseForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = ['amount', 'description', 'date']
+        
+        widgets = {
+            'amount': forms.NumberInput(attrs={
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0.01'
+            }),
+            'description': forms.TextInput(attrs={
+                'placeholder': 'e.g., Groceries, Rent, Entertainment'
+            }),
+            'date': forms.DateInput(attrs={
+                'type': 'date'
+            })
+        }
+        
+        labels = {
+            'amount': 'Amount ($)',
+            'description': 'What did you buy?',
+            'date': 'Date'
+        }
+    
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        
+        if amount is not None and amount <= 0:
+            raise ValidationError("Amount must be greater than zero.")
+        
+        return amount
+    
+    def clean_date(self):
+        expense_date = self.cleaned_data.get('date')
+        
+        if expense_date and expense_date > date.today():
+            raise ValidationError("Expense date cannot be in the future.")
+        
+        return expense_date

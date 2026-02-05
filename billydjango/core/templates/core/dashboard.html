@@ -19,17 +19,74 @@
     {% endif %}
     
     <main>
-        <h2>Welcome to your dashboard!</h2>
-        <p>You are now logged in and can access protected content.</p>
+        <h2>Financial Summary</h2>
+        <p><strong>Total Income:</strong> ${{ total_income }}</p>
+        <p><strong>Total Expenses:</strong> ${{ total_expenses }}</p>
+        <p><strong>Balance:</strong> ${{ balance }}</p>
         
-        <h3>Your Account Information:</h3>
-        <ul>
-            <li><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</li>
-            <li><strong>Username:</strong> {{ user.username }}</li>
-            <li><strong>Email:</strong> {{ user.email }}</li>
-            <li><strong>Account Created:</strong> {{ user.date_joined|date:"F d, Y" }}</li>
-            <li><strong>Last Login:</strong> {{ user.last_login|date:"F d, Y g:i A" }}</li>
-        </ul>
+        <hr>
+        
+        <h2>Income Records</h2>
+        <a href="{% url 'core:add_income' %}">Add Income</a>
+        
+        {% if incomes %}
+            <table style="border: 1px solid black;">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for income in incomes %}
+                    <tr>
+                        <td>{{ income.source }}</td>
+                        <td>${{ income.amount }}</td>
+                        <td>{{ income.date }}</td>
+                        <td>
+                            <a href="{% url 'core:delete_income' income.id %}">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No income records yet.</p>
+        {% endif %}
+        
+        <hr>
+        
+        <h2>Expense Records</h2>
+        <a href="{% url 'core:add_expense' %}">Add Expense</a>
+        
+        {% if expenses %}
+            <table style="border: 1px solid black;">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense.description }}</td>
+                        <td>${{ expense.amount }}</td>
+                        <td>{{ expense.date }}</td>
+                        <td>
+                            <a href="{% url 'core:delete_expense' expense.id %}">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No expense records yet.</p>
+        {% endif %}
     </main>
 </body>
 </html>
