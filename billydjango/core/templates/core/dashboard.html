@@ -4,89 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .summary {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 2px solid #333;
+        }
+        .columns {
+            display: flex;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Billy Dashboard</h1>
-        <p>Hello, {{ user.first_name|default:user.username }}!</p>
-        <a href="{% url 'core:logout' %}">Logout</a>
-    </header>
-    
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
-    
-    <main>
-        <h2>Financial Summary</h2>
-        <p><strong>Total Income:</strong> ${{ total_income }}</p>
-        <p><strong>Total Expenses:</strong> ${{ total_expenses }}</p>
-        <p><strong>Balance:</strong> ${{ balance }}</p>
+    <div class="container">
+        <header>
+            <h1>🐱 Billy Dashboard</h1>
+            <p>Hello, {{ user.first_name|default:user.username }}!</p>
+            <a href="{% url 'core:logout' %}">Logout</a>
+        </header>
         
-        <hr>
-        
-        <h2>Income Records</h2>
-        <a href="{% url 'core:add_income' %}">Add Income</a>
-        
-        {% if incomes %}
-            <table style="border: 1px solid black;">
-                <thead>
-                    <tr>
-                        <th>Source</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for income in incomes %}
-                    <tr>
-                        <td>{{ income.source }}</td>
-                        <td>${{ income.amount }}</td>
-                        <td>{{ income.date }}</td>
-                        <td>
-                            <a href="{% url 'core:delete_income' income.id %}">Delete</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No income records yet.</p>
+        {% if messages %}
+            {% for message in messages %}
+                <p><strong>{{ message }}</strong></p>
+            {% endfor %}
         {% endif %}
         
-        <hr>
-        
-        <h2>Expense Records</h2>
-        <a href="{% url 'core:add_expense' %}">Add Expense</a>
-        
-        {% if expenses %}
-            <table style="border: 1px solid black;">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for expense in expenses %}
-                    <tr>
-                        <td>{{ expense.description }}</td>
-                        <td>${{ expense.amount }}</td>
-                        <td>{{ expense.date }}</td>
-                        <td>
-                            <a href="{% url 'core:delete_expense' expense.id %}">Delete</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No expense records yet.</p>
-        {% endif %}
-    </main>
+        <main>
+            <!-- CENTER: SAVINGS SUMMARY (Phase 4.2) -->
+            <div class="summary">
+                <h2>Financial Summary</h2>
+                <p><strong>Total Income:</strong> ${{ total_income|floatformat:2 }}</p>
+                <p><strong>Total Expenses:</strong> ${{ total_expenses|floatformat:2 }}</p>
+                <h3>Balance: ${{ balance|floatformat:2 }}</h3>
+            </div>
+            
+            <!-- TWO-COLUMN LAYOUT (Phase 4.2) -->
+            <div class="columns">
+                <!-- LEFT COLUMN: INCOME -->
+                <div class="column">
+                    <h2>Income Records</h2>
+                    <p><a href="{% url 'core:add_income' %}">➕ Add Income</a></p>
+                    
+                    {% if incomes %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for income in incomes %}
+                                <tr>
+                                    <td>{{ income.source }}</td>
+                                    <td>${{ income.amount }}</td>
+                                    <td>{{ income.date }}</td>
+                                    <td>
+                                        <a href="{% url 'core:delete_income' income.id %}">🗑️ Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No income records yet. <a href="{% url 'core:add_income' %}">Add your first income!</a></p>
+                    {% endif %}
+                </div>
+                
+                <!-- RIGHT COLUMN: EXPENSES -->
+                <div class="column">
+                    <h2>Expense Records</h2>
+                    <p><a href="{% url 'core:add_expense' %}">➕ Add Expense</a></p>
+                    
+                    {% if expenses %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in expenses %}
+                                <tr>
+                                    <td>{{ expense.description }}</td>
+                                    <td>${{ expense.amount }}</td>
+                                    <td>{{ expense.date }}</td>
+                                    <td>
+                                        <a href="{% url 'core:delete_expense' expense.id %}">🗑️ Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No expense records yet. <a href="{% url 'core:add_expense' %}">Add your first expense!</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

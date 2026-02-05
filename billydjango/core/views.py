@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Sum
 from .forms import SignupForm, LoginForm, IncomeForm, ExpenseForm
 from .models import Income, Expense
 
@@ -53,7 +54,6 @@ def signup_view(request):
     
     return render(request, 'core/signup.html', {'form': form})
 
-
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -81,34 +81,34 @@ def login_view(request):
             next_url = request.GET.get('next')
             if next_url:
                 return redirect(next_url)
-            return redirect('core:dashboard')
-
-    
+            return redirect('core:dashboard')  
     else:
         # GET request - show empty form
         form = LoginForm()
     
     return render(request, 'core/login.html', {'form': form})
 
-
 def logout_view(request):
     logout(request)
     messages.info(request, 'You have been logged out successfully.')
     return redirect('core:landing')  
 
-
 @login_required
 def dashboard_view(request):
-    """
-    Dashboard - Protected page that shows user's financial data
-    """
     # Fetch ONLY the logged-in user's records
     incomes = Income.objects.filter(user=request.user).order_by('-date')
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
     
-    # Calculate totals
-    total_income = sum(income.amount for income in incomes)
-    total_expenses = sum(expense.amount for expense in expenses)
+    # more efficient to aggegrate and sum in db than in Python
+    total_income = Income.objects.filter(user=request.user).aggregate(
+        total=Sum('amount')
+    )['total'] or 0
+    
+    total_expenses = Expense.objects.filter(user=request.user).aggregate(
+        total=Sum('amount')
+    )['total'] or 0
+    
+    # SAVINGS CALCULATION - Computed on server
     balance = total_income - total_expenses
     
     return render(request, 'core/dashboard.html', {
@@ -119,8 +119,6 @@ def dashboard_view(request):
         'total_expenses': total_expenses,
         'balance': balance,
     })
-
-#################################################################################################################
 
 @login_required
 def add_income(request):
