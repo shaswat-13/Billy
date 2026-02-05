@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <header>
+        <h1>Billy Dashboard</h1>
+        <p>Hello, {{ user.first_name|default:user.username }}!</p>
+        <a href="{% url 'core:logout' %}">Logout</a>
+    </header>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    
+    <main>
+        <h2>Welcome to your dashboard!</h2>
+        <p>You are now logged in and can access protected content.</p>
+        
+        <h3>Your Account Information:</h3>
+        <ul>
+            <li><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</li>
+            <li><strong>Username:</strong> {{ user.username }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>Account Created:</strong> {{ user.date_joined|date:"F d, Y" }}</li>
+            <li><strong>Last Login:</strong> {{ user.last_login|date:"F d, Y g:i A" }}</li>
+        </ul>
+    </main>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Billy - Personal Finance Tracker</title>
+  </head>
+  <body>
+    <header>
+      <h1>🐱 Billy</h1>
+      <nav>
+        <a href="{% url 'core:login' %}">Login</a>
+        <a href="{% url 'core:signup' %}">Sign Up</a>
+      </nav>
+    </header>
+
+    <main>
+      <h2>Your Very Own Expense Tracker</h2>
+      <p>
+        <a href="{% url 'core:login' %}">Login</a>
+        <a href="{% url 'core:signup' %}">Sign Up</a>
+      </p>
+    </main>
+  </body>
+</html>
