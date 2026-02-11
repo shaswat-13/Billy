@@ -137,6 +137,9 @@ def add_income(request):
             
             messages.success(request, f'Income of ${income.amount} added successfully!')
             return redirect('core:dashboard')
+        
+        else:
+            messages.error(request, 'Please correct the errors below.')
     
     else:
         # GET request - show empty form
@@ -162,7 +165,9 @@ def add_expense(request):
             
             messages.success(request, f'Expense of ${expense.amount} added successfully!')
             return redirect('core:dashboard')
-    
+        else:
+            messages.error(request, 'Please correct the errors below.')
+
     else:
         # GET request - show empty form
         form = ExpenseForm()
