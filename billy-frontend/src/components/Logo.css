@@ -1,0 +1,68 @@
+/* ============================================
+   BIL.LY LOGO
+   ============================================ */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Inter', sans-serif;
+  user-select: none;
+}
+
+.logo-cat {
+  font-size: 48px;
+  line-height: 1;
+  filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.2));
+}
+
+.logo-text {
+  display: flex;
+  align-items: baseline;
+  font-weight: 900;
+  color: var(--black);
+}
+
+.logo-bil {
+  font-size: 42px;
+}
+
+.logo-dot {
+  font-size: 42px;
+  color: var(--yellow);
+}
+
+.logo-ly {
+  font-size: 42px;
+}
+
+/* Sizes */
+.logo-small .logo-cat {
+  font-size: 24px;
+}
+
+.logo-small .logo-bil,
+.logo-small .logo-dot,
+.logo-small .logo-ly {
+  font-size: 20px;
+}
+
+.logo-medium .logo-cat {
+  font-size: 36px;
+}
+
+.logo-medium .logo-bil,
+.logo-medium .logo-dot,
+.logo-medium .logo-ly {
+  font-size: 30px;
+}
+
+.logo-large .logo-cat {
+  font-size: 48px;
+}
+
+.logo-large .logo-bil,
+.logo-large .logo-dot,
+.logo-large .logo-ly {
+  font-size: 42px;
+}

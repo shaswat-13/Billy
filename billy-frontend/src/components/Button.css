@@ -1,0 +1,87 @@
+/* ============================================
+   BIL.LY BUTTON STYLES
+   ============================================ */
+
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  border: 3px solid var(--black);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Primary Button - Yellow with black text */
+.btn-primary {
+  background-color: var(--yellow);
+  color: var(--black);
+  box-shadow: 3px 3px 0px var(--black);
+}
+
+.btn-primary:hover:not(.btn-disabled) {
+  background-color: var(--yellow-dark);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px var(--black);
+}
+
+.btn-primary:active:not(.btn-disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--black);
+}
+
+/* Secondary Button - Black with yellow text */
+.btn-secondary {
+  background-color: var(--black);
+  color: var(--yellow);
+  box-shadow: 3px 3px 0px var(--yellow);
+}
+
+.btn-secondary:hover:not(.btn-disabled) {
+  background-color: #2A2A2A;
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px var(--yellow);
+}
+
+/* Danger Button - For delete actions */
+.btn-danger {
+  background-color: #FF5252;
+  color: var(--white);
+  box-shadow: 3px 3px 0px var(--black);
+}
+
+.btn-danger:hover:not(.btn-disabled) {
+  background-color: #FF1744;
+}
+
+/* Sizes */
+.btn-small {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.btn-medium {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.btn-large {
+  padding: 16px 32px;
+  font-size: 18px;
+}
+
+/* Full width */
+.btn-full {
+  width: 100%;
+}
+
+/* Disabled state */
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

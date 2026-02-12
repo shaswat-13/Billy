@@ -1,0 +1,41 @@
+/* ============================================
+   BIL.LY CARD STYLES - Paper/Bill Aesthetic
+   ============================================ */
+
+.card {
+  background: var(--white);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 3px solid var(--yellow);
+}
+
+.card-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.card-title {
+  font-weight: 900;
+  font-size: 24px;
+  margin: 0;
+  color: var(--black);
+}
+
+.card-body {
+  position: relative;
+  z-index: 1;
+}
