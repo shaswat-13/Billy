@@ -37,10 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'core'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -125,4 +127,8 @@ LOGIN_URL = 'core:login'
 LOGIN_REDIRECT_URL = 'core:dashboard'
 
 # redirect after logout
-LOGOUT_REDIRECT_URL = 'core:landing'  
+LOGOUT_REDIRECT_URL = 'core:landing' 
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+]
