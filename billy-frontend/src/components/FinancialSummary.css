@@ -1,0 +1,52 @@
+.financial-summary {
+  margin-bottom: var(--space-xl);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-lg);
+}
+
+.summary-item {
+  text-align: center;
+  padding: var(--space-lg);
+  border-radius: 8px;
+  border: 3px solid var(--black);
+}
+
+.summary-item.income {
+  background-color: #E8F5E9;
+}
+
+.summary-item.expense {
+  background-color: #FFEBEE;
+}
+
+.summary-item.balance {
+  background-color: var(--yellow);
+}
+
+.summary-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+
+.summary-value {
+  display: block;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--black);
+}
+
+.summary-value.positive {
+  color: #2E7D32;
+}
+
+.summary-value.negative {
+  color: #C62828;
+}

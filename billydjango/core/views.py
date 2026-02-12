@@ -4,193 +4,149 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import get_token
+import json
+
 from .forms import SignupForm, LoginForm, IncomeForm, ExpenseForm
 from .models import Income, Expense
 
+# ============================================
+# AUTH & UTILITY VIEWS
+# ============================================
+
 def index(request):
+    """Landing page view"""
     if request.user.is_authenticated:
         return redirect('core:dashboard')
-    
     return render(request, 'core/index.html')
 
+def check_auth(request):
+    """Essential for React to check if session is valid and get CSRF token"""
+    get_token(request) 
+    if request.user.is_authenticated:
+        return JsonResponse({
+            'isAuthenticated': True,
+            'user': {
+                'username': request.user.username,
+                'first_name': request.user.first_name,
+            }
+        })
+    return JsonResponse({'isAuthenticated': False}, status=401)
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def signup_view(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        
-        if form.is_valid():
-            # Extract cleaned data
-            name = form.cleaned_data['name']
-            username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            
-            # Split name into first_name and last_name
-            name_parts = name.split(' ', 1)
-            first_name = name_parts[0]
-            last_name = name_parts[1] if len(name_parts) > 1 else ''
-            
-            # Create user using Django's user manager
-            user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name
-                )
+    try:
+        data = json.loads(request.body)
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        email = data.get('email', '').strip()
+        name = data.get('name', '').strip()
 
-            
-            # Log the user in immediately after signup
-            login(request, user)
-            
-            # Success message
-            messages.success(request, f'Welcome, {first_name}! Your account has been created.')
-            
-            # Redirect to dashboard (prevents form resubmission)
-            return redirect('core:dashboard')  # Change 'dashboard' to your actual URL name
-    
-    else:
-        # GET request - show empty form
-        form = SignupForm()
-    
-    return render(request, 'core/signup.html', {'form': form})
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'error': 'Username already taken'}, status=400)
 
+        name_parts = name.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        user = User.objects.create_user(
+            username=username, email=email, password=password,
+            first_name=first_name, last_name=last_name
+        )
+        login(request, user)
+        return JsonResponse({'success': True, 'user': {'username': user.username}})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
+    try:
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(request, username=username, password=password)
         
-        if form.is_valid():
-            # Fetch the authenticated user from cleaned_data
-            user = form.cleaned_data['user']
-            
-            # Create session and log user in
+        if user:
             login(request, user)
-            
-            # Handle "remember me" functionality
-            remember_me = form.cleaned_data.get('remember_me')
-            if not remember_me:
-                # Session expires when browser closes
-                request.session.set_expiry(0)
-            else:
-                # Session persists for 2 weeks (default Django behavior)
-                request.session.set_expiry(1209600)
-            
-            # Success message
-            messages.success(request, f'Welcome back, {user.first_name or user.username}!')
-            
-            # Redirect to dashboard (or to 'next' parameter if it exists)
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
-            return redirect('core:dashboard')  
-    else:
-        # GET request - show empty form
-        form = LoginForm()
-    
-    return render(request, 'core/login.html', {'form': form})
+            return JsonResponse({'success': True, 'user': {'username': user.username}})
+        return JsonResponse({'error': 'Invalid credentials'}, status=401)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
+@csrf_exempt
 def logout_view(request):
     logout(request)
-    messages.info(request, 'You have been logged out successfully.')
-    return redirect('core:landing')  
+    return JsonResponse({'success': True})
+
+# ============================================
+# DATA VIEWS (API)
+# ============================================
 
 @login_required
-def dashboard_view(request):
-    # Fetch ONLY the logged-in user's records
+def dashboard_api(request):
+    """The main data source for your React Dashboard"""
     incomes = Income.objects.filter(user=request.user).order_by('-date')
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
     
-    # more efficient to aggegrate and sum in db than in Python
-    total_income = Income.objects.filter(user=request.user).aggregate(
-        total=Sum('amount')
-    )['total'] or 0
+    total_inc = incomes.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_exp = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
     
-    total_expenses = Expense.objects.filter(user=request.user).aggregate(
-        total=Sum('amount')
-    )['total'] or 0
-    
-    # SAVINGS CALCULATION - Computed on server
-    balance = total_income - total_expenses
-    
-    return render(request, 'core/dashboard.html', {
-        'user': request.user,
-        'incomes': incomes,
-        'expenses': expenses,
-        'total_income': total_income,
-        'total_expenses': total_expenses,
-        'balance': balance,
+    return JsonResponse({
+        'incomes': [{'id': i.id, 'amount': str(i.amount), 'source': i.source, 'date': i.date.strftime('%Y-%m-%d')} for i in incomes],
+        'expenses': [{'id': e.id, 'amount': str(e.amount), 'description': e.description, 'date': e.date.strftime('%Y-%m-%d')} for e in expenses],
+        'total_income': float(total_inc),
+        'total_expenses': float(total_exp),
+        'balance': float(total_inc - total_exp),
+        'user': {'username': request.user.username, 'first_name': request.user.first_name}
     })
 
+@csrf_exempt
 @login_required
+@require_http_methods(["POST"])
 def add_income(request):
-    if request.method == 'POST':
-        form = IncomeForm(request.POST)
-        
-        if form.is_valid():
-            # Create income object but DON'T save to database yet
-            income = form.save(commit=False)
-            
-            # Set ownership
-            income.user = request.user
-            
-            # NOW save to database
-            income.save()
-            
-            messages.success(request, f'Income of ${income.amount} added successfully!')
-            return redirect('core:dashboard')
-        
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    
-    else:
-        # GET request - show empty form
-        form = IncomeForm()
-    
-    return render(request, 'core/add_income.html', {'form': form})
+    try:
+        data = json.loads(request.body)
+        income = Income.objects.create(
+            user=request.user,
+            amount=data.get('amount'),
+            source=data.get('source'),
+            date=data.get('date')
+        )
+        return JsonResponse({'success': True, 'id': income.id}, status=201)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
-
+@csrf_exempt
 @login_required
+@require_http_methods(["POST"])
 def add_expense(request):
-    if request.method == 'POST':
-        form = ExpenseForm(request.POST)
-        
-        if form.is_valid():
-            # Create expense object but DON'T save yet
-            expense = form.save(commit=False)
-            
-            # Set ownership
-            expense.user = request.user
-            
-            # Save to database
-            expense.save()
-            
-            messages.success(request, f'Expense of ${expense.amount} added successfully!')
-            return redirect('core:dashboard')
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    try:
+        data = json.loads(request.body)
+        expense = Expense.objects.create(
+            user=request.user,
+            amount=data.get('amount'),
+            description=data.get('description'),
+            date=data.get('date')
+        )
+        return JsonResponse({'success': True, 'id': expense.id}, status=201)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
-    else:
-        # GET request - show empty form
-        form = ExpenseForm()
-    
-    return render(request, 'core/add_expense.html', {'form': form})
-
+@csrf_exempt
 @login_required
 def delete_income(request, income_id):
     income = get_object_or_404(Income, id=income_id, user=request.user)
-    
-    # Only runs if ownership verified
     income.delete()
-    
-    messages.success(request, 'Income deleted successfully!')
-    return redirect('core:dashboard')
+    return JsonResponse({'success': True})
 
-
+@csrf_exempt
 @login_required
 def delete_expense(request, expense_id):
-    # Ownership check built into this line
     expense = get_object_or_404(Expense, id=expense_id, user=request.user)
-    
     expense.delete()
-    
-    messages.success(request, 'Expense deleted successfully!')
-    return redirect('core:dashboard')
+    return JsonResponse({'success': True})

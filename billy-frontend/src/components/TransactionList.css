@@ -1,0 +1,97 @@
+.transaction-list {
+  height: 100%;
+}
+
+.transaction-header {
+  margin-bottom: var(--space-lg);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-xxl) var(--space-lg);
+  color: #666;
+}
+
+.transactions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  transition: transform 0.2s ease;
+}
+
+.transaction-item:hover {
+  transform: translateX(-4px);
+}
+
+.transaction-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.transaction-name {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.transaction-date {
+  font-size: 14px;
+  color: #666;
+}
+
+.transaction-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.transaction-amount {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--black);
+}
+
+/* Add to existing TransactionList.css */
+
+.transaction-item {
+  /* ... existing styles ... */
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Stagger animations */
+.transaction-item:nth-child(1) { animation-delay: 0.05s; }
+.transaction-item:nth-child(2) { animation-delay: 0.1s; }
+.transaction-item:nth-child(3) { animation-delay: 0.15s; }
+.transaction-item:nth-child(4) { animation-delay: 0.2s; }
+.transaction-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* Delete animation */
+.transaction-item.deleting {
+  animation: slideOutRight 0.3s ease forwards;
+}
+
+@keyframes slideOutRight {
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}

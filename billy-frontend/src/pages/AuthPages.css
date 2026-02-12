@@ -1,0 +1,60 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 500px;
+}
+
+.auth-form {
+  margin-top: var(--space-lg);
+}
+
+.error-banner {
+  background-color: #FFE5E5;
+  color: #D32F2F;
+  padding: var(--space-md);
+  border-radius: 8px;
+  border: 2px solid #D32F2F;
+  margin-bottom: var(--space-lg);
+  font-weight: 600;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkbox-group label {
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: var(--space-lg);
+  color: #666;
+}
+
+.auth-switch a {
+  color: var(--black);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.auth-switch a:hover {
+  color: var(--yellow-dark);
+}
